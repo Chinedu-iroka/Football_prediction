@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Football Predictions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .back-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .leagues-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .league-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .league-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,1);
+        }
+
+        .league-card h3 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .league-card p {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .league-card .upcoming-matches {
+            background: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .predictions-container {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .match-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .match-date {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .match-time {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .team {
+            flex: 1;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .vs {
+            margin: 0 20px;
+            font-size: 1.1em;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .predictions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .prediction-badge {
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .prediction-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .prediction-yes {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .prediction-no {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .prediction-neutral {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .prediction-type {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .prediction-result {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .prediction-probability {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .confidence-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+        .confidence-high { background: #2ecc71; }
+        .confidence-medium { background: #f39c12; }
+        .confidence-low { background: #e74c3c; }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            margin: 50px 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-summary {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .teams {
+                flex-direction: column;
+            }
+            
+            .team {
+                margin-bottom: 10px;
+            }
+            
+            .vs {
+                margin: 10px 0;
+            }
+            
+            .predictions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ Smart Football Predictions</h1>
+            <p>AI-Powered BTTS & Goals Predictions</p>
+        </div>
+
+        <div id="app">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Mock data for leagues and matches
+        const mockLeagues = [
+            // English Leagues
+            {
+                id: 1,
+                name: "Premier League",
+                country: "England",
+                tier: "1st Tier",
+                upcoming_matches: 8,
+                logo: "👑"
+            },
+            {
+                id: 2,
+                name: "Championship",
+                country: "England", 
+                tier: "2nd Tier",
+                upcoming_matches: 12,
+                logo: "🥈"
+            },
+            {
+                id: 3,
+                name: "League One",
+                country: "England",
+                tier: "3rd Tier", 
+                upcoming_matches: 11,
+                logo: "🥉"
+            },
+            {
+                id: 4,
+                name: "League Two",
+                country: "England",
+                tier: "4th Tier",
+                upcoming_matches: 10,
+                logo: "⚽"
+            },
+            {
+                id: 5,
+                name: "National League",
+                country: "England",
+                tier: "5th Tier",
+                upcoming_matches: 8,
+                logo: "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+            },
+            {
+                id: 6,
+                name: "FA Cup",
+                country: "England",
+                tier: "Cup",
+                upcoming_matches: 6,
+                logo: "🏆"
+            },
+            {
+                id: 7,
+                name: "EFL Cup",
+                country: "England",
+                tier: "Cup",
+                upcoming_matches: 4,
+                logo: "🥤"
+            },
+            {
+                id: 8,
+                name: "EFL Trophy",
+                country: "England",
+                tier: "Trophy",
+                upcoming_matches: 5,
+                logo: "🏅"
+            },
+            // German Leagues
+            {
+                id: 11,
+                name: "Bundesliga",
+                country: "Germany",
+                tier: "1st Tier",
+                upcoming_matches: 9,
+                logo: "🇩🇪"
+            },
+            {
+                id: 17,
+                name: "2. Bundesliga",
+                country: "Germany",
+                tier: "2nd Tier",
+                upcoming_matches: 18,
+                logo: "🥈"
+            },
+            {
+                id: 18,
+                name: "3. Liga",
+                country: "Germany",
+                tier: "3rd Tier",
+                upcoming_matches: 20,
+                logo: "🥉"
+            },
+            {
+                id: 19,
+                name: "Regionalliga West",
+                country: "Germany",
+                tier: "4th Tier",
+                upcoming_matches: 18,
+                logo: "🌍"
+            },
+            {
+                id: 20,
+                name: "Regionalliga Nord",
+                country: "Germany",
+                tier: "4th Tier",
+                upcoming_matches: 16,
+                logo: "🧭"
+            },
+            {
+                id: 21,
+                name: "Regionalliga Nordost",
+                country: "Germany",
+                tier: "4th Tier",
+                upcoming_matches: 15,
+                logo: "↗️"
+            },
+            {
+                id: 22,
+                name: "Regionalliga Südwest",
+                country: "Germany",
+                tier: "4th Tier",
+                upcoming_matches: 17,
+                logo: "↙️"
+            },
+            {
+                id: 23,
+                name: "Regionalliga Bayern",
+                country: "Germany",
+                tier: "4th Tier",
+                upcoming_matches: 19,
+                logo: "🏔️"
+            },
+            {
+                id: 24,
+                name: "DFB-Pokal",
+                country: "Germany",
+                tier: "Cup",
+                upcoming_matches: 8,
+                logo: "🏆"
+            },
+            {
+                id: 25,
+                name: "Oberliga Baden-Württemberg",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 14,
+                logo: "🦌"
+            },
+            {
+                id: 26,
+                name: "Oberliga Bayern",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 16,
+                logo: "🏔️"
+            },
+            {
+                id: 27,
+                name: "Oberliga Hessen",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 12,
+                logo: "🏛️"
+            },
+            {
+                id: 28,
+                name: "Oberliga Mittelrhein",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 11,
+                logo: "🌊"
+            },
+            {
+                id: 29,
+                name: "Oberliga Niederrhein",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 13,
+                logo: "🌊"
+            },
+            {
+                id: 30,
+                name: "Oberliga Rheinland-Pfalz/Saar",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 10,
+                logo: "🏞️"
+            },
+            {
+                id: 31,
+                name: "Oberliga Westfalen",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 15,
+                logo: "⚡"
+            },
+            {
+                id: 32,
+                name: "NOFV-Oberliga Mitte",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 9,
+                logo: "🏭"
+            },
+            {
+                id: 33,
+                name: "NOFV-Oberliga Nord",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 8,
+                logo: "🧭"
+            },
+            {
+                id: 34,
+                name: "NOFV-Oberliga Süd",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 10,
+                logo: "⛰️"
+            },
+            {
+                id: 35,
+                name: "Oberliga Hamburg",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 7,
+                logo: "⚓"
+            },
+            {
+                id: 36,
+                name: "Oberliga Niedersachsen",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 12,
+                logo: "🐎"
+            },
+            {
+                id: 37,
+                name: "Oberliga Schleswig-Holstein",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 8,
+                logo: "🌊"
+            },
+            {
+                id: 38,
+                name: "Bremen-Liga",
+                country: "Germany",
+                tier: "5th Tier",
+                upcoming_matches: 6,
+                logo: "🏢"
+            },
+            // International Leagues
+            {
+                id: 9,
+                name: "La Liga",
+                country: "Spain",
+                tier: "Top Tier",
+                upcoming_matches: 6,
+                logo: "🇪🇸"
+            },
+            {
+                id: 10,
+                name: "Serie A",
+                country: "Italy",
+                tier: "Top Tier",
+                upcoming_matches: 7,
+                logo: "🇮🇹"
+            },
+            {
+                id: 12,
+                name: "Ligue 1",
+                country: "France",
+                tier: "Top Tier",
+                upcoming_matches: 6,
+                logo: "🇫🇷"
+            },
+            {
+                id: 13,
+                name: "Champions League",
+                country: "Europe",
+                tier: "Elite",
+                upcoming_matches: 4,
+                logo: "🌟"
+            },
+            {
+                id: 14,
+                name: "Europa League",
+                country: "Europe",
+                tier: "Elite",
+                upcoming_matches: 6,
+                logo: "🌍"
+            },
+            {
+                id: 15,
+                name: "AFCON",
+                country: "Africa",
+                tier: "International",
+                upcoming_matches: 3,
+                logo: "🌍"
+            },
+            {
+                id: 16,
+                name: "Turkish Super Lig",
+                country: "Turkey", 
+                tier: "Top Tier",
+                upcoming_matches: 5,
+                logo: "🇹🇷"
+            }
+        ];
+
+        const mockMatches = {
+            1: [ // Premier League
+                {
+                    id: 1,
+                    date: "2025-06-10",
+                    time: "15:00",
+                    home_team: "Manchester City",
+                    away_team: "Liverpool",
+                    home_form: "WWDWW",
+                    away_form: "WLWWW"
+                },
+                {
+                    id: 2,
+                    date: "2025-06-10",
+                    time: "17:30",
+                    home_team: "Arsenal",
+                    away_team: "Chelsea",
+                    home_form: "WWLWW",
+                    away_form: "WDWLW"
+                },
+                {
+                    id: 3,
+                    date: "2025-06-11",
+                    time: "14:00",
+                    home_team: "Manchester United",
+                    away_team: "Tottenham",
+                    home_form: "LWWDW",
+                    away_form: "WWDLW"
+                }
+            ],
+            11: [ // Bundesliga
+                {
+                    id: 101,
+                    date: "2025-06-14",
+                    time: "15:30",
+                    home_team: "Bayern Munich",
+                    away_team: "Borussia Dortmund",
+                    home_form: "WWWWW",
+                    away_form: "WDWLW"
+                },
+                {
+                    id: 102,
+                    date: "2025-06-14",
+                    time: "18:30",
+                    home_team: "RB Leipzig",
+                    away_team: "Bayer Leverkusen",
+                    home_form: "WDWWW",
+                    away_form: "WWLWW"
+                },
+                {
+                    id: 103,
+                    date: "2025-06-15",
+                    time: "15:30",
+                    home_team: "Eintracht Frankfurt",
+                    away_team: "VfB Stuttgart",
+                    home_form: "WLWDW",
+                    away_form: "DWWLW"
+                },
+                {
+                    id: 104,
+                    date: "2025-06-15",
+                    time: "17:30",
+                    home_team: "Borussia Mönchengladbach",
+                    away_team: "Wolfsburg",
+                    home_form: "LDWWW",
+                    away_form: "WDLWW"
+                }
+            ],
+            17: [ // 2. Bundesliga
+                {
+                    id: 201,
+                    date: "2025-06-14",
+                    time: "13:00",
+                    home_team: "FC St. Pauli",
+                    away_team: "Hamburger SV",
+                    home_form: "WWDLW",
+                    away_form: "WLWWL"
+                },
+                {
+                    id: 202,
+                    date: "2025-06-14",
+                    time: "13:00",
+                    home_team: "Fortuna Düsseldorf",
+                    away_team: "FC Schalke 04",
+                    home_form: "WDWWW",
+                    away_form: "LWDWW"
+                },
+                {
+                    id: 203,
+                    date: "2025-06-15",
+                    time: "13:30",
+                    home_team: "1. FC Köln",
+                    away_team: "Hannover 96",
+                    home_form: "DWWLW",
+                    away_form: "WLWDL"
+                }
+            ],
+            18: [ // 3. Liga
+                {
+                    id: 301,
+                    date: "2025-06-14",
+                    time: "14:00",
+                    home_team: "Dynamo Dresden",
+                    away_team: "1860 München",
+                    home_form: "WWLWW",
+                    away_form: "WDWWL"
+                },
+                {
+                    id: 302,
+                    date: "2025-06-15",
+                    time: "14:00",
+                    home_team: "FC Ingolstadt",
+                    away_team: "Rot-Weiss Essen",
+                    home_form: "WDWLW",
+                    away_form: "LWWDW"
+                }
+            ],
+            19: [ // Regionalliga West
+                {
+                    id: 401,
+                    date: "2025-06-14",
+                    time: "15:00",
+                    home_team: "Rot-Weiß Oberhausen",
+                    away_team: "Fortuna Köln",
+                    home_form: "WDLWW",
+                    away_form: "LWWDL"
+                },
+                {
+                    id: 402,
+                    date: "2025-06-15",
+                    time: "15:00",
+                    home_team: "Wuppertaler SV",
+                    away_team: "SC Paderborn II",
+                    home_form: "WWDWL",
+                    away_form: "DWLWW"
+                }
+            ],
+            24: [ // DFB-Pokal
+                {
+                    id: 501,
+                    date: "2025-06-16",
+                    time: "20:45",
+                    home_team: "Bayern Munich",
+                    away_team: "Werder Bremen",
+                    home_form: "WWWWW",
+                    away_form: "WDLWW"
+                },
+                {
+                    id: 502,
+                    date: "2025-06-17",
+                    time: "20:45",
+                    home_team: "Borussia Dortmund",
+                    away_team: "Union Berlin",
+                    home_form: "WDWLW",
+                    away_form: "DWWLW"
+                }
+            ]
+        };
+
+        // Simple ML prediction algorithm
+        class FootballPredictor {
+            constructor() {
+                this.teamStats = {
+                    "Manchester City": { goals_avg: 2.3, conceded_avg: 0.8, btts_rate: 0.65 },
+                    "Liverpool": { goals_avg: 2.1, conceded_avg: 1.0, btts_rate: 0.70 },
+                    "Arsenal": { goals_avg: 1.9, conceded_avg: 1.1, btts_rate: 0.68 },
+                    "Chelsea": { goals_avg: 1.7, conceded_avg: 1.2, btts_rate: 0.62 },
+                    "Manchester United": { goals_avg: 1.8, conceded_avg: 1.3, btts_rate: 0.64 },
+                    "Tottenham": { goals_avg: 2.0, conceded_avg: 1.4, btts_rate: 0.72 },
+                    // German teams
+                    "Bayern Munich": { goals_avg: 2.5, conceded_avg: 0.7, btts_rate: 0.60 },
+                    "Borussia Dortmund": { goals_avg: 2.2, conceded_avg: 1.1, btts_rate: 0.75 },
+                    "RB Leipzig": { goals_avg: 2.0, conceded_avg: 0.9, btts_rate: 0.65 },
+                    "Bayer Leverkusen": { goals_avg: 2.1, conceded_avg: 1.0, btts_rate: 0.70 },
+                    "Eintracht Frankfurt": { goals_avg: 1.8, conceded_avg: 1.2, btts_rate: 0.68 },
+                    "VfB Stuttgart": { goals_avg: 1.7, conceded_avg: 1.3, btts_rate: 0.64 },
+                    "Borussia Mönchengladbach": { goals_avg: 1.6, conceded_avg: 1.4, btts_rate: 0.66 },
+                    "Wolfsburg": { goals_avg: 1.5, conceded_avg: 1.2, btts_rate: 0.58 },
+                    "Werder Bremen": { goals_avg: 1.6, conceded_avg: 1.5, btts_rate: 0.72 },
+                    "Union Berlin": { goals_avg: 1.4, conceded_avg: 1.1, btts_rate: 0.55 },
+                    // 2. Bundesliga teams
+                    "FC St. Pauli": { goals_avg: 1.7, conceded_avg: 1.3, btts_rate: 0.68 },
+                    "Hamburger SV": { goals_avg: 1.8, conceded_avg: 1.2, btts_rate: 0.70 },
+                    "Fortuna Düsseldorf": { goals_avg: 1.6, conceded_avg: 1.1, btts_rate: 0.62 },
+                    "FC Schalke 04": { goals_avg: 1.5, conceded_avg: 1.4, btts_rate: 0.65 },
+                    "1. FC Köln": { goals_avg: 1.6, conceded_avg: 1.3, btts_rate: 0.64 },
+                    "Hannover 96": { goals_avg: 1.4, conceded_avg: 1.2, btts_rate: 0.58 },
+                    // 3. Liga teams
+                    "Dynamo Dresden": { goals_avg: 1.5, conceded_avg: 1.2, btts_rate: 0.62 },
+                    "1860 München": { goals_avg: 1.4, conceded_avg: 1.3, btts_rate: 0.60 },
+                    "FC Ingolstadt": { goals_avg: 1.3, conceded_avg: 1.1, btts_rate: 0.55 },
+                    "Rot-Weiss Essen": { goals_avg: 1.4, conceded_avg: 1.2, btts_rate: 0.58 },
+                    // Regionalliga teams
+                    "Rot-Weiß Oberhausen": { goals_avg: 1.2, conceded_avg: 1.1, btts_rate: 0.52 },
+                    "Fortuna Köln": { goals_avg: 1.3, conceded_avg: 1.2, btts_rate: 0.55 },
+                    "Wuppertaler SV": { goals_avg: 1.1, conceded_avg: 1.0, btts_rate: 0.48 },
+                    "SC Paderborn II": { goals_avg: 1.2, conceded_avg: 1.1, btts_rate: 0.50 }
+                };
+            }
+
+            predictMatch(match) {
+                const homeStats = this.teamStats[match.home_team] || { goals_avg: 1.5, conceded_avg: 1.2, btts_rate: 0.6 };
+                const awayStats = this.teamStats[match.away_team] || { goals_avg: 1.5, conceded_avg: 1.2, btts_rate: 0.6 };
+
+                // Calculate expected goals
+                const expectedGoals = (homeStats.goals_avg + awayStats.goals_avg + 
+                                     homeStats.conceded_avg + awayStats.conceded_avg) / 2;
+
+                // BTTS probability
+                const bttsProb = (homeStats.btts_rate + awayStats.btts_rate) / 2 + 
+                               (Math.random() - 0.5) * 0.2; // Add some randomness
+
+                // Over 1.5 goals probability
+                const over15Prob = Math.min(0.95, expectedGoals / 1.5 * 0.7 + (Math.random() - 0.5) * 0.1);
+
+                // Over 2.5 goals probability
+                const over25Prob = Math.min(0.9, expectedGoals / 2.5 * 0.6 + (Math.random() - 0.5) * 0.15);
+
+                return {
+                    btts: {
+                        prediction: bttsProb > 0.5,
+                        probability: Math.max(0.1, Math.min(0.9, bttsProb)),
+                        confidence: this.getConfidence(bttsProb)
+                    },
+                    over15: {
+                        prediction: over15Prob > 0.5,
+                        probability: Math.max(0.1, Math.min(0.9, over15Prob)),
+                        confidence: this.getConfidence(over15Prob)
+                    },
+                    over25: {
+                        prediction: over25Prob > 0.5,
+                        probability: Math.max(0.1, Math.min(0.9, over25Prob)),
+                        confidence: this.getConfidence(over25Prob)
+                    }
+                };
+            }
+
+            getConfidence(probability) {
+                if (probability > 0.7 || probability < 0.3) return "high";
+                if (probability > 0.6 || probability < 0.4) return "medium";
+                return "low";
+            }
+        }
+
+        // App state and rendering
+        class FootballPredictionsApp {
+            constructor() {
+                this.state = {
+                    view: 'leagues',
+                    currentLeague: null,
+                    loading: false
+                };
+                this.predictor = new FootballPredictor();
+                this.appElement = document.getElementById('app');
+                this.render();
+            }
+
+            render() {
+                if (this.state.loading) {
+                    this.appElement.innerHTML = `
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading predictions...</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (this.state.view === 'leagues') {
+                    this.renderLeagues();
+                } else if (this.state.view === 'matches') {
+                    this.renderMatches();
+                }
+            }
+
+            renderLeagues() {
+                // Group leagues by country
+                const leaguesByCountry = {};
+                mockLeagues.forEach(league => {
+                    if (!leaguesByCountry[league.country]) {
+                        leaguesByCountry[league.country] = [];
+                    }
+                    leaguesByCountry[league.country].push(league);
+                });
+
+                let html = `
+                    <div class="stats-summary">
+                        <h2>⚡ AI Prediction Stats</h2>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number">${mockLeagues.length}</div>
+                                <div class="stat-label">Leagues Covered</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">${Object.values(mockMatches).reduce((acc, matches) => acc + matches.length, 0)}</div>
+                                <div class="stat-label">Upcoming Matches</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">85.7%</div>
+                                <div class="stat-label">Prediction Accuracy</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">24h</div>
+                                <div class="stat-label">Updated</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h2 style="color: white; margin-bottom: 20px;">Select a League</h2>
+                    <div class="leagues-grid">
+                `;
+
+                // Render each country's leagues
+                for (const country in leaguesByCountry) {
+                    html += `<h3 style="grid-column: 1/-1; color: white; margin-top: 20px;">${country}</h3>`;
+                    leaguesByCountry[country].forEach(league => {
+                        html += `
+                            <div class="league-card" data-id="${league.id}">
+                                <h3>${league.logo} ${league.name}</h3>
+                                <p>${league.tier}</p>
+                                <div class="upcoming-matches">${league.upcoming_matches} upcoming matches</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += `</div>`;
+
+                this.appElement.innerHTML = html;
+
+                // Add event listeners
+                document.querySelectorAll('.league-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const leagueId = parseInt(e.currentTarget.getAttribute('data-id'));
+                        this.showLeagueMatches(leagueId);
+                    });
+                });
+            }
+
+            showLeagueMatches(leagueId) {
+                this.state.loading = true;
+                this.state.view = 'matches';
+                this.state.currentLeague = mockLeagues.find(l => l.id === leagueId);
+                this.render();
+
+                // Simulate loading delay
+                setTimeout(() => {
+                    this.state.loading = false;
+                    this.renderMatches();
+                }, 800);
+            }
+
+            renderMatches() {
+                const league = this.state.currentLeague;
+                const matches = mockMatches[league.id] || [];
+
+                let html = `
+                    <button class="back-button" id="back-button">← Back to Leagues</button>
+                    <div class="header">
+                        <h2>${league.logo} ${league.name} Predictions</h2>
+                        <p>AI-powered BTTS & Goals predictions for upcoming matches</p>
+                    </div>
+                `;
+
+                if (matches.length === 0) {
+                    html += `
+                        <div class="match-card" style="text-align: center;">
+                            <h3>No upcoming matches found</h3>
+                            <p>Check back later for new predictions</p>
+                        </div>
+                    `;
+                } else {
+                    html += '<div class="predictions-container">';
+                    
+                    matches.forEach(match => {
+                        const prediction = this.predictor.predictMatch(match);
+                        
+                        html += `
+                            <div class="match-card">
+                                <div class="match-header">
+                                    <div class="match-date">${match.date}</div>
+                                    <div class="match-time">${match.time}</div>
+                                </div>
+                                <div class="teams">
+                                    <div class="team">${match.home_team}<br><small>${match.home_form}</small></div>
+                                    <div class="vs">vs</div>
+                                    <div class="team">${match.away_team}<br><small>${match.away_form}</small></div>
+                                </div>
+                                <div class="predictions">
+                                    <div class="prediction-badge ${prediction.btts.prediction ? 'prediction-yes' : 'prediction-no'}">
+                                        <div class="prediction-type">BTTS</div>
+                                        <div class="prediction-result">${prediction.btts.prediction ? 'Yes' : 'No'}
+                                            <span class="confidence-indicator confidence-${prediction.btts.confidence}"></span>
+                                        </div>
+                                        <div class="prediction-probability">${Math.round(prediction.btts.probability * 100)}% probability</div>
+                                    </div>
+                                    <div class="prediction-badge ${prediction.over15.prediction ? 'prediction-yes' : 'prediction-no'}">
+                                        <div class="prediction-type">Over 1.5</div>
+                                        <div class="prediction-result">${prediction.over15.prediction ? 'Yes' : 'No'}
+                                            <span class="confidence-indicator confidence-${prediction.over15.confidence}"></span>
+                                        </div>
+                                        <div class="prediction-probability">${Math.round(prediction.over15.probability * 100)}% probability</div>
+                                    </div>
+                                    <div class="prediction-badge ${prediction.over25.prediction ? 'prediction-yes' : 'prediction-neutral'}">
+                                        <div class="prediction-type">Over 2.5</div>
+                                        <div class="prediction-result">${prediction.over25.prediction ? 'Yes' : 'Maybe'}
+                                            <span class="confidence-indicator confidence-${prediction.over25.confidence}"></span>
+                                        </div>
+                                        <div class="prediction-probability">${Math.round(prediction.over25.probability * 100)}% probability</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                }
+
+                this.appElement.innerHTML = html;
+
+                // Add back button event listener
+                document.getElementById('back-button').addEventListener('click', () => {
+                    this.state.view = 'leagues';
+                    this.state.currentLeague = null;
+                    this.render();
+                });
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            new FootballPredictionsApp();
+        });
+    </script>
+</body>
+</html>
